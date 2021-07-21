@@ -14,7 +14,7 @@ namespace CHIP_8
 
         public static void Init()
         {
-            if(SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0) 
+            if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0)
             {
                 Console.WriteLine("Unable to initialize SDL. Error: {0}", SDL.SDL_GetError());
                 return;
