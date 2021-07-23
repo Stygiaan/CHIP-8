@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,7 +32,7 @@ namespace CHIP_8
             Array.Clear(V, 0, V.Length);
             I = 0;
             Pc = 0x200;
-            // Array.Clear(Gfx, 0, Gfx.Length);
+            Array.Clear(Gfx, 0, Gfx.Length);
             Array.Clear(Stack, 0, Stack.Length);
             Sp = 0;
             Array.Clear(Keys, 0, Keys.Length);
@@ -59,7 +60,6 @@ namespace CHIP_8
         public static void EmulateCycle()
         {
             FetchOpcode();
-            // Console.WriteLine(Opcode);
             ExecuteOpcode();
 
             UpdateTimers();
@@ -187,10 +187,13 @@ namespace CHIP_8
                             Pc += 2;
                             break;
 
-                        // TODO: Store LSB in VF before shifting?
                         // 8XY6 - Stores the least significant bit of VX in VF and then shifts VX to the right by 1. 
                         case 0x0006:
+                            int lsbPosition = BitOperations.TrailingZeroCount(V[(Opcode & 0x0F00) >> 8]);
+
+                            V[0xF] = (byte)((0b0000_0001 << lsbPosition) & V[(Opcode & 0x0F00) >> 8]);
                             V[(Opcode & 0x0F00) >> 8] >>= 1;
+
                             Pc += 2;
                             break;
 
@@ -204,11 +207,13 @@ namespace CHIP_8
                             Pc += 2;
                             break;
 
-                        // TODO: Store MSB in VF before shifting?
                         // 8XYE - Stores the most significant bit of VX in VF and then shifts VX to the left by 1
                         case 0x000E:
-                            //V[0xF] = 
+                            int msbPosition = BitOperations.LeadingZeroCount(V[(Opcode & 0x0F00) >> 8]);
+
+                            V[0xF] = (byte)((0b1000_0000 >> msbPosition) & V[(Opcode & 0x0F00) >> 8]);
                             V[(Opcode & 0x0F00) >> 8] <<= 1;
+
                             Pc += 2;
                             break;
                     }
