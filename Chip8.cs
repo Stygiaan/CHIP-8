@@ -79,15 +79,19 @@ namespace CHIP_8
                         // 00E0 - Clears the screen. 
                         case 0x0000:
                             Graphics.Clear();
+
                             Pc += 2;
                             break;
+
                         // 00EE - Returns from a subroutine. 
                         case 0x000E:
                             Stack[Sp] = 0;
                             Sp--;
+
                             Pc = Stack[Sp] += 2;
                             break;
                         default:
+                            Console.WriteLine("Unknown Opcode {0:X}", Opcode);
                             break;
                     }
                     break;
@@ -131,12 +135,14 @@ namespace CHIP_8
                 // 6XNN - Sets VX to NN. 
                 case 0x6000:
                     V[(Opcode & 0x0F00) >> 8] = (byte)(Opcode & 0x00FF);
+
                     Pc += 2;
                     break;
 
                 // 7XNN - Adds NN to VX. (Carry flag is not changed); 
                 case 0x7000:
                     V[(Opcode & 0x0F00) >> 8] += (byte)(Opcode & 0x00FF);
+
                     Pc += 2;
                     break;
 
@@ -146,24 +152,28 @@ namespace CHIP_8
                         // 8XY0 - Sets VX to the value of VY. 
                         case 0x0000:
                             V[(Opcode & 0x0F00) >> 8] = V[(Opcode & 0x00F0) >> 4];
+
                             Pc += 2;
                             break;
 
                         // 8XY1 - Sets VX to VX or VY. (Bitwise OR operation); 
                         case 0x0001:
                             V[(Opcode & 0x0F00) >> 8] = (byte)(V[(Opcode & 0x0F00) >> 8] | V[(Opcode & 0x00F0) >> 4]);
+
                             Pc += 2;
                             break;
 
                         // 8XY2 - Sets VX to VX and VY. (Bitwise AND operation); 
                         case 0x0002:
                             V[(Opcode & 0x0F00) >> 8] = (byte)(V[(Opcode & 0x0F00) >> 8] & V[(Opcode & 0x00F0) >> 4]);
+
                             Pc += 2;
                             break;
 
                         // 8XY3 - Sets VX to VX xor VY. 
                         case 0x0003:
                             V[(Opcode & 0x0F00) >> 8] = (byte)(V[(Opcode & 0x0F00) >> 8] ^ V[(Opcode & 0x00F0) >> 4]);
+
                             Pc += 2;
                             break;
 
@@ -174,6 +184,7 @@ namespace CHIP_8
                             else
                                 V[0xF] = 0;
                             V[(Opcode & 0x0F00) >> 8] += V[(Opcode & 0x00F0) >> 4];
+
                             Pc += 2;
                             break;
 
@@ -184,15 +195,21 @@ namespace CHIP_8
                             else
                                 V[0xF] = 1;
                             V[(Opcode & 0x0F00) >> 8] -= V[(Opcode & 0x00F0) >> 4];
+
                             Pc += 2;
                             break;
 
                         // 8XY6 - Stores the least significant bit of VX in VF and then shifts VX to the right by 1. 
                         case 0x0006:
-                            int lsbPosition = BitOperations.TrailingZeroCount(V[(Opcode & 0x0F00) >> 8]);
+                            /*int lsbPosition = BitOperations.TrailingZeroCount(V[(Opcode & 0x0F00) >> 8]);
 
                             V[0xF] = (byte)((0b0000_0001 << lsbPosition) & V[(Opcode & 0x0F00) >> 8]);
-                            V[(Opcode & 0x0F00) >> 8] >>= 1;
+                            V[(Opcode & 0x0F00) >> 8] >>= 1;*/
+
+                            int lsbPosition = BitOperations.TrailingZeroCount(V[(Opcode & 0x00F0) >> 4]);
+
+                            V[0xF] = (byte)((0b0000_0001 << lsbPosition) & V[(Opcode & 0x00F0) >> 4]);
+                            V[(Opcode & 0x0F00) >> 8] = (byte)(V[(Opcode & 0x00F0) >> 4] >> 1);
 
                             Pc += 2;
                             break;
@@ -204,17 +221,27 @@ namespace CHIP_8
                             else
                                 V[0xF] = 1;
                             V[(Opcode & 0x0F00) >> 8] = (byte)(V[(Opcode & 0x00F0) >> 4] - V[(Opcode & 0x0F00) >> 8]);
+
                             Pc += 2;
                             break;
 
                         // 8XYE - Stores the most significant bit of VX in VF and then shifts VX to the left by 1
                         case 0x000E:
-                            int msbPosition = BitOperations.LeadingZeroCount(V[(Opcode & 0x0F00) >> 8]);
+                            /*int msbPosition = BitOperations.LeadingZeroCount(V[(Opcode & 0x0F00) >> 8]);
 
                             V[0xF] = (byte)((0b1000_0000 >> msbPosition) & V[(Opcode & 0x0F00) >> 8]);
-                            V[(Opcode & 0x0F00) >> 8] <<= 1;
+                            V[(Opcode & 0x0F00) >> 8] <<= 1;*/
+
+                            int msbPosition = BitOperations.LeadingZeroCount(V[(Opcode & 0x00F0) >> 4]);
+
+                            V[0xF] = (byte)((0b1000_0000 >> msbPosition) & V[(Opcode & 0x00F0) >> 4]);
+                            V[(Opcode & 0x0F00) >> 8] = (byte)(V[(Opcode & 0x00F0) >> 4] >> 1);
 
                             Pc += 2;
+                            break;
+
+                        default:
+                            Console.WriteLine("Unknown Opcode {0:X}", Opcode);
                             break;
                     }
                     break;
@@ -275,6 +302,7 @@ namespace CHIP_8
                     }
 
                     DrawFlag = true;
+
                     Pc += 2;
                     break;
 
@@ -296,6 +324,10 @@ namespace CHIP_8
                             else
                                 Pc += 2;
                             break;
+
+                        default:
+                            Console.WriteLine("Unknown Opcode {0:X}", Opcode);
+                            break;
                     }
                     break;
 
@@ -305,36 +337,42 @@ namespace CHIP_8
                         // FX07 - Sets VX to the value of the delay timer. 
                         case 0x0007:
                             V[(Opcode & 0x0F00) >> 8] = DelayTimer;
+
                             Pc += 2;
                             break;
 
                         // FX0A - A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event); 
                         case 0x000A:
                             V[(Opcode & 0x0F00) >> 8] = Input.AwaitAnyKey();
+
                             Pc += 2;
                             break;
 
                         // FX15 - Sets the delay timer to VX. 
                         case 0x0015:
                             DelayTimer = V[(Opcode & 0x0F00) >> 8];
+
                             Pc += 2;
                             break;
 
                         // FX18 - Sets the sound timer to VX. 
                         case 0x0018:
                             SoundTimer = V[(Opcode & 0x0F00) >> 8];
+
                             Pc += 2;
                             break;
 
                         // FX1E - Adds VX to I. VF is not affected.
                         case 0x001E:
                             I += V[(Opcode & 0x0F00) >> 8];
+
                             Pc += 2;
                             break;
 
                         // FX29 - Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font. 
                         case 0x0029:
                             I = (ushort)(80 + ((V[(Opcode & 0x0F00) >> 8]) * 5));
+
                             Pc += 2;
                             break;
 
@@ -345,6 +383,7 @@ namespace CHIP_8
                             Memory[I] = (byte)(V[(Opcode & 0x0F00) >> 8] / 100);
                             Memory[I + 1] = (byte)((V[(Opcode & 0x0F00) >> 8] / 10) % 10);
                             Memory[I + 2] = (byte)((V[(Opcode & 0x0F00) >> 8] % 100) % 10);
+
                             Pc += 2;
                             break;
 
@@ -352,9 +391,8 @@ namespace CHIP_8
                         // but I itself is left unmodified.
                         case 0x0055:
                             for (int i = 0; i <= ((Opcode & 0x0F00) >> 8); i++)
-                            {
                                 Memory[I + i] = V[i];
-                            }
+
                             Pc += 2;
                             break;
 
@@ -362,9 +400,8 @@ namespace CHIP_8
                         // but I itself is left unmodified.
                         case 0x0065:
                             for (int i = 0; i <= ((Opcode & 0x0F00) >> 8); i++)
-                            {
                                 V[i] = Memory[I + i];
-                            }
+
                             Pc += 2;
                             break;
                     }
@@ -372,7 +409,7 @@ namespace CHIP_8
 
                 // Undefined Opcode
                 default:
-                    Console.WriteLine("Unknown Opcode");
+                    Console.WriteLine("Unknown Opcode {0:X}", Opcode);
                     break;
             }
         }
@@ -381,7 +418,8 @@ namespace CHIP_8
             DelayTimer = (byte)(DelayTimer > 0 ? --DelayTimer : 0);
 
             if (SoundTimer == 1)
-                Console.Beep();
+                // Console.Beep();
+                // Audio.Beep();
             SoundTimer = (byte)(SoundTimer > 0 ? --SoundTimer : 0);
         }
 
