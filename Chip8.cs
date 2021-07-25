@@ -25,6 +25,8 @@ namespace CHIP_8
         static byte DelayTimer;
         static byte SoundTimer;
 
+        private static bool UseLegacyMode;
+
         public static void Init()
         {
             Opcode = 0;
@@ -88,7 +90,7 @@ namespace CHIP_8
                             Stack[Sp] = 0;
                             Sp--;
 
-                            Pc = Stack[Sp] += 2;
+                            Pc = (ushort)(Stack[Sp] + 2);
                             break;
                         default:
                             Console.WriteLine("Unknown Opcode {0:X}", Opcode);
@@ -206,20 +208,31 @@ namespace CHIP_8
                             V[0xF] = (byte)((0b0000_0001 << lsbPosition) & V[(Opcode & 0x0F00) >> 8]);
                             V[(Opcode & 0x0F00) >> 8] >>= 1;*/
 
-                            int lsbPosition = BitOperations.TrailingZeroCount(V[(Opcode & 0x00F0) >> 4]);
+                            /*int lsbPosition = BitOperations.TrailingZeroCount(V[(Opcode & 0x00F0) >> 4]);
+
+                            Console.WriteLine(V[(Opcode & 0x00F0) >> 4] >> 1);
 
                             V[0xF] = (byte)((0b0000_0001 << lsbPosition) & V[(Opcode & 0x00F0) >> 4]);
-                            V[(Opcode & 0x0F00) >> 8] = (byte)(V[(Opcode & 0x00F0) >> 4] >> 1);
+                            V[(Opcode & 0x0F00) >> 8] = (byte)(V[(Opcode & 0x00F0) >> 4] >> 1);*/
+
+                            if ((V[(Opcode & 0x0F00) >> 8] & 0b0000_0001) > 0)
+                                V[0xF] = 1;
+                            else
+                                V[0xF] = 0;
+
+                            V[(Opcode & 0x0F00) >> 8] >>= 1;
+                            V[(Opcode & 0x0F00) >> 8] /= 2;
 
                             Pc += 2;
                             break;
 
                         // 8XY7 - Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there is not. 
                         case 0x0007:
-                            if ((V[(Opcode & 0x00F0) >> 4] - V[(Opcode & 0x0F00) >> 8]) < 0x0)
-                                V[0xF] = 0;
-                            else
+                            if (V[(Opcode & 0x00F0) >> 4] > V[(Opcode & 0x0F00) >> 8])
                                 V[0xF] = 1;
+                            else
+                                V[0xF] = 0;
+
                             V[(Opcode & 0x0F00) >> 8] = (byte)(V[(Opcode & 0x00F0) >> 4] - V[(Opcode & 0x0F00) >> 8]);
 
                             Pc += 2;
@@ -227,15 +240,27 @@ namespace CHIP_8
 
                         // 8XYE - Stores the most significant bit of VX in VF and then shifts VX to the left by 1
                         case 0x000E:
-                            /*int msbPosition = BitOperations.LeadingZeroCount(V[(Opcode & 0x0F00) >> 8]);
+                            /*int msbPosition = BitOperations.LeadingZeroCount(V[(Opcode & 0x0F00) >> 8]) / 8;
+
+                            Console.WriteLine(msbPosition);
 
                             V[0xF] = (byte)((0b1000_0000 >> msbPosition) & V[(Opcode & 0x0F00) >> 8]);
                             V[(Opcode & 0x0F00) >> 8] <<= 1;*/
 
-                            int msbPosition = BitOperations.LeadingZeroCount(V[(Opcode & 0x00F0) >> 4]);
+                            /*int msbPosition = BitOperations.LeadingZeroCount(V[(Opcode & 0x00F0) >> 4]);
+
+                            Console.WriteLine(V[(Opcode & 0x00F0) >> 4] << 1);
 
                             V[0xF] = (byte)((0b1000_0000 >> msbPosition) & V[(Opcode & 0x00F0) >> 4]);
-                            V[(Opcode & 0x0F00) >> 8] = (byte)(V[(Opcode & 0x00F0) >> 4] >> 1);
+                            V[(Opcode & 0x0F00) >> 8] = (byte)(V[(Opcode & 0x00F0) >> 4] << 1);*/
+
+                            if ((V[(Opcode & 0x0F00) >> 8] & 0b1000_0000) > 0)
+                                V[0xF] = 1;
+                            else
+                                V[0xF] = 0;
+
+                            V[(Opcode & 0x0F00) >> 8] <<= 1;
+                            V[(Opcode & 0x0F00) >> 8] *= 2;
 
                             Pc += 2;
                             break;

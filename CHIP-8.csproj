@@ -6,7 +6,16 @@
     <RootNamespace>CHIP_8</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
+    <PackageReference Include="OpenTK" Version="4.6.4" />
     <PackageReference Include="ppy.SDL2-CS" Version="1.0.82" />
   </ItemGroup>
 

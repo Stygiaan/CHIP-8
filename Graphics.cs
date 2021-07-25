@@ -9,14 +9,17 @@ namespace CHIP_8
 {
     static class Graphics
     {
-        static IntPtr Window;
-        static IntPtr Renderer;
+        private static IntPtr Window;
+        private static IntPtr Renderer;
+
+        private static long FpsUpdateTimer = 0;
+        private static List<long> DeltaSamples = new List<long>();
 
         public static void Init()
         {
             if (SDL.SDL_Init(SDL.SDL_INIT_VIDEO) < 0)
             {
-                Console.WriteLine("Unable to initialize SDL. Error: {0}", SDL.SDL_GetError());
+                Console.WriteLine("Unable to initialize SDL-Video. Error: {0}", SDL.SDL_GetError());
                 return;
             }
 
@@ -30,7 +33,7 @@ namespace CHIP_8
         {
             SDL.SDL_Event e;
 
-            while(SDL.SDL_PollEvent(out e) != 0)
+            while (SDL.SDL_PollEvent(out e) != 0)
             {
                 switch (e.type)
                 {
@@ -38,15 +41,15 @@ namespace CHIP_8
                         Program.Running = false;
                         break;
 
-                    // TODO: keep aspect ratio of render context on window resize
-                    /*case SDL.SDL_EventType.SDL_WINDOWEVENT:
-                        switch (e.window.windowEvent)
-                        {
-                            case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED:
+                        // TODO: keep aspect ratio of render context on window resize
+                        /*case SDL.SDL_EventType.SDL_WINDOWEVENT:
+                            switch (e.window.windowEvent)
+                            {
+                                case SDL.SDL_WindowEventID.SDL_WINDOWEVENT_RESIZED:
 
-                                break;
-                        }
-                        break;*/
+                                    break;
+                            }
+                            break;*/
                 }
             }
         }
@@ -94,7 +97,25 @@ namespace CHIP_8
 
         public static void ShowFPS(long deltaTime)
         {
-            Console.WriteLine("FPS: " + 1000 / deltaTime);
+            Console.WriteLine(deltaTime);
+
+            if(deltaTime > 0)
+                SDL.SDL_SetWindowTitle(Window, "CHIP-8 | Average FPS: " + (1000 / deltaTime));
+
+            // Console.WriteLine(deltaTime);
+
+            /*DeltaSamples.Add(deltaTime);
+            FpsUpdateTimer += deltaTime;
+
+            if (FpsUpdateTimer >= 1000)
+            {
+                double avrgDelta = DeltaSamples.Average();
+
+                SDL.SDL_SetWindowTitle(Window, "CHIP-8 | Average FPS: " + (int)(FpsUpdateTimer / avrgDelta));
+
+                DeltaSamples.Clear();
+                FpsUpdateTimer = 0;
+            }*/
         }
 
         public static void Destroy()

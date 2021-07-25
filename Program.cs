@@ -1,22 +1,27 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 
 namespace CHIP_8
 {
     static class Program
     {
+        public static bool Running = true;
+        private static Stopwatch Timer = new Stopwatch();
+
         static void Main(string[] args)
         {
             Chip8.Init();
-            Chip8.LoadGame("wipeoff");
+            Chip8.LoadGame("blinky");
 
             Graphics.Init();
+            // Audio.Init();
 
-            while (true)
+            while (Running)
             {
-                Graphics.UpdateWindow();
+                Timer.Restart();
 
-                Input.GetInput();
+                Input.UpdateKeymap();
 
                 Chip8.EmulateCycle();
 
@@ -27,8 +32,15 @@ namespace CHIP_8
                     Chip8.DrawFlag = false;
                 }
 
-                // Thread.Sleep(16);
+                Graphics.UpdateWindow();
+
+                Thread.Sleep(2);
+
+                Graphics.ShowFPS(Timer.ElapsedMilliseconds);
             }
+
+            Graphics.Destroy();
+            // Audio.Destroy();
         }
     }
 }
